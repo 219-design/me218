@@ -1,4 +1,4 @@
-ME218 PCB Ruler
+# ME218 PCB Ruler
 The ME218 PCB Ruler is a multi-disciplinary tool and development platform. Explore this repository to find inspiration for some of the many ways that this ruler can be built out to help you solve problems and create cool projects.
 
 Brainstormed projects
