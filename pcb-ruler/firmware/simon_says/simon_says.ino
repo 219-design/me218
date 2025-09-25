@@ -11,20 +11,6 @@ const char* c_btn_name[NUM_BTNS] = {
   [CENTER_BTN_IDX] = "CENTER",
 };
 
-
-//sound const/defines
-//TODO: determine ALL sounds
-const uint32_t c_btn_sound[NUM_BTNS] = {
-  [UP_BTN_IDX] = 10,
-  [DOWN_BTN_IDX] = 20,
-  [LEFT_BTN_IDX] = 30,
-  [RIGHT_BTN_IDX] = 40,
-  [CENTER_BTN_IDX] = 50,
-};
-#define START_SOUND 90
-#define BAD_BTN_SOUND 100
-#define SUCCESS_SOUND 200
-
 int get_pixel_index(uint8_t button_idx) {
   switch (button_idx) {
     case UP_BTN_IDX:
@@ -47,8 +33,22 @@ void set_btn_pixel(uint8_t btn_idx) {
   set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
 }
 
+//sound const/defines
+const uint32_t c_btn_sound[NUM_BTNS] = {
+  [UP_BTN_IDX] = 50,
+  [DOWN_BTN_IDX] = 100,
+  [LEFT_BTN_IDX] = 150,
+  [RIGHT_BTN_IDX] = 200,
+  [CENTER_BTN_IDX] = 300,
+};
+#define START_SOUND 900
+#define BAD_BTN_SOUND 1000
+#define SUCCESS_SOUND 2000
 
 //plays sound on speaker
+void play_sound(uint32_t sound) {
+  analogWrite(AUDIO_PIN, sound);
+}
 
 typedef enum {
   STATE_IDLE = 0,
@@ -198,6 +198,9 @@ void idle_time(uint32_t delay_ms) {
 void setup() {
   buttons_init();
   pixels_init();
+
+  play_sound(0);
+  pinMode(AUDIO_PIN, OUTPUT);
 
   Serial.begin(115200);
   while (!Serial) {

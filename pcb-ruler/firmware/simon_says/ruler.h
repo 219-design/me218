@@ -1,6 +1,6 @@
 
 //neopixels
-#define NEOPIXEL_PIN    3
+#define NEOPIXEL_PIN 3
 
 #define UP_PIXEL_IDX 3
 #define DOWN_PIXEL_IDX 1
@@ -20,4 +20,4 @@
 #define NUM_BTNS (5)
 
 //implemenation specific
-#define AUDIO_PIN (0)
+#define AUDIO_PIN (A0)
