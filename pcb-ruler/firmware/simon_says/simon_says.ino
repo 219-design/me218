@@ -3,6 +3,11 @@
 #include "pixels.h"
 #include "simon.h"
 
+#include "Wire.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+//https://github.com/adafruit/Adafruit_SSD1306
+
 const char* c_btn_name[NUM_BTNS] = {
   [UP_BTN_IDX] = "UP",
   [DOWN_BTN_IDX] = "DOWN",
@@ -61,6 +66,12 @@ static e_state m_state = STATE_IDLE;
 const int c_blink_delay_ms = 750;
 const int c_round_delay_ms = 1000;
 
+constexpr uint8_t kDisplayWidth{128};
+constexpr uint8_t kDisplayHeight{64};
+constexpr int8_t kOledReset{-1}; // No Reset Pin
+
+Adafruit_SSD1306 display(kDisplayWidth, kDisplayHeight, &Wire, kOledReset);
+
 //returns status of player initiated game start
 bool check_for_game_start() {
   uint8_t btns = buttons_get_presses();
@@ -71,7 +82,7 @@ bool check_for_game_start() {
   return start;
 }
 
-//presents game start 
+//presents game start
 //returns if game started by player
 bool present_wait_for_game_start() {
   clear_presentation();
@@ -81,18 +92,18 @@ bool present_wait_for_game_start() {
   set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
   int end = millis() + (c_blink_delay_ms / 2);
   while (millis() < end) {
-    if(check_for_game_start()){
+    if (check_for_game_start()) {
       return true;
     }
-  }    
+  }
   //off
   clear_pixels();
   end = millis() + (c_blink_delay_ms / 2);
   while (millis() < end) {
-    if(check_for_game_start()){
+    if (check_for_game_start()) {
       return true;
     }
-  }    
+  }
   return false;
 }
 
@@ -101,6 +112,10 @@ bool present_wait_for_game_start() {
 void present_round() {
   uint32_t round_num = get_round_number();
   Serial.printf("ROUND %d\r\n", round_num);
+
+  show_display_round(round_num);
+  idle_time(500);
+
   // set of pixel sequences are displayed
   clear_presentation();
   int show_duration_ms = get_round_show_duration_ms();
@@ -176,6 +191,7 @@ void present_start_game() {
 
 // presents failed round sound and display
 void present_bad_round(uint32_t failed_round_num) {
+  show_display_failure();
   play_sound(BAD_BTN_SOUND);
   // blink the correct button
   int btn_idx = get_round_btn_idx(failed_round_num);
@@ -195,6 +211,58 @@ void idle_time(uint32_t delay_ms) {
   }
 }
 
+void show_display_wait(){
+  // Clear the buffer
+  display.clearDisplay();
+  // Set text color to white
+  display.setTextColor(SSD1306_WHITE); 
+  // Set cursor position (column, row)
+  display.setCursor(0, 2); 
+
+  display.setTextSize(1); 
+  display.println("press center 2 play");
+
+  display.setCursor(0, 20); 
+ // Set text size
+  display.setTextSize(4); 
+  // Print text
+  display.println("SIMON");
+
+  display.display();
+}
+
+void show_display_round(uint8_t round_num){
+    // Clear the buffer
+  display.clearDisplay();
+  // Set text color to white
+  display.setTextColor(SSD1306_WHITE); 
+  // Set cursor position (column, row)
+
+  display.setCursor(0, 20); 
+ // Set text size
+  display.setTextSize(2); 
+  // Print text
+  display.printf("ROUND %d\r\n", round_num);
+
+  display.display();
+}
+
+void show_display_failure(){
+    // Clear the buffer
+  display.clearDisplay();
+  // Set text color to white
+  display.setTextColor(SSD1306_WHITE); 
+  // Set cursor position (column, row)
+
+  display.setCursor(0, 20); 
+ // Set text size
+  display.setTextSize(2); 
+  // Print text
+  display.println("OOPS!!");
+
+  display.display();
+}
+
 void setup() {
   buttons_init();
   pixels_init();
@@ -208,6 +276,12 @@ void setup() {
   }
   Serial.println("HELLO");
 
+  // Initialize Display
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
+    Serial.println(F("SSD1306 allocation failed"));
+  }
+
+  show_display_wait();
   reset_game();
 }
 
@@ -216,7 +290,7 @@ void loop() {
 
   switch (m_state) {
     case STATE_IDLE:
-      if(present_wait_for_game_start()){
+      if (present_wait_for_game_start()) {
         present_start_game();
         start_game();
         m_state = STATE_RUNNING;
@@ -232,9 +306,10 @@ void loop() {
           present_bad_round(failed_round_num);
           end_game();
         }
-        idle_time(c_round_delay_ms);
+        idle_time(c_round_delay_ms/2);
 
         if (game_over()) {
+          show_display_wait();
           reset_game();
           m_state = STATE_IDLE;
         }
