@@ -17,11 +17,13 @@ const int c_btn_pin[NUM_BTNS] = {
   [CENTER_BTN_IDX] = CENTER_BTN_PIN,
 };
 
-#define UP_BTN_MASK (1 << UP_BTN_IDX)
-#define DOWN_BTN_MASK (1 << DOWN_BTN_IDX)
-#define LEFT_BTN_MASK (1 << LEFT_BTN_IDX)
-#define RIGHT_BTN_MASK (1 << RIGHT_BTN_IDX)
-#define CENTER_BTN_MASK (1 << CENTER_BTN_IDX)
+const char* c_btn_name[NUM_BTNS] = {
+  [UP_BTN_IDX] = "UP",
+  [DOWN_BTN_IDX] = "DOWN",
+  [LEFT_BTN_IDX] = "LEFT",
+  [RIGHT_BTN_IDX] = "RIGHT",
+  [CENTER_BTN_IDX] = "CENTER",
+};
 
 //neopixel defines/const
 #define UP_PIXEL_MASK (1 << UP_PIXEL_IDX)
@@ -161,6 +163,11 @@ void blink_pixels(uint8_t pixel_mask, int blink_duration_ms, int cnt) {
   }
 }
 
+void set_btn_pixel(uint8_t btn_idx){
+  int pixel_idx = get_pixel_index(btn_idx);
+  set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
+}
+
 //returns status of player initiated game start
 bool check_for_game_start() {
   uint8_t btns = get_button_presses();
@@ -232,10 +239,9 @@ void present_round() {
   int show_duration_ms = get_round_show_duration_ms(m_round);
   for (int i = 0; i < m_round; ++i) {
     int btn_idx = m_round_btn[i];
-    Serial.printf("%d ", btn_idx);
+    Serial.printf("%s ", c_btn_name[btn_idx]);
     play_sound(c_btn_sound[btn_idx]);
-    int pixel_idx = get_pixel_index(btn_idx);
-    set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
+    set_btn_pixel(btn_idx);
     cross.show();
     idle_time(show_duration_ms);
     clear_presentation();
@@ -249,9 +255,8 @@ void present_player_button_press(uint8_t btn_mask) {
   clear_presentation();
   for (int i = 0; i < NUM_BTNS - 1; ++i) {
     if (btn_mask & (1 << i)) {
-      int pixel_idx = get_pixel_index(i);
-      Serial.printf("PLAYER PRESS %d: pix idx %d\r\n", i, pixel_idx);
-      set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
+      Serial.printf("PLAYER PRESS : %s\r\n", c_btn_name[i]);
+      set_btn_pixel(i);
       cross.show();
       play_sound(c_btn_sound[i]);
       return;
