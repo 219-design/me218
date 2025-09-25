@@ -97,7 +97,7 @@ typedef enum {
 static e_state m_state = STATE_IDLE;
 #define START_BTN_MASK (CENTER_BTN_MASK)
 
-#define MAX_ROUNDS (5)
+#define MAX_ROUNDS (20)
 #define REPEAT_LIMIT (3)
 static int m_round = 0;
 static int m_repeat_cnt = 0;
@@ -112,7 +112,7 @@ uint8_t get_button_presses() {
     int now = millis();
     int rd = digitalRead(c_btn_pin[idx]);
     if (rd != m_last_btn_rd[idx]) {
-      Serial.printf("btn: %d : %d\r\n", idx, rd);
+      // Serial.printf("btn: %d : %d\r\n", idx, rd);
       m_last_btn_debounce_time[idx] = now;
     }
     m_last_btn_rd[idx] = rd;
@@ -121,7 +121,7 @@ uint8_t get_button_presses() {
       //update m_debounce_btn_val
       if (m_debounce_btn_val[idx] != (rd == BTN_ASSERT_LEVEL)) {
         m_debounce_btn_val[idx] = (rd == BTN_ASSERT_LEVEL);
-        Serial.printf("db: %d : %d\r\n", idx, m_debounce_btn_val[idx]);
+        // Serial.printf("db: %d : %d\r\n", idx, m_debounce_btn_val[idx]);
       }
     }
 
