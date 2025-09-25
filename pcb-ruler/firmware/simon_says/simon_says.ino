@@ -37,15 +37,6 @@ const int c_btn_pin[NUM_BTNS] = {
 #define RIGHT_PIXEL_COLOR (Adafruit_NeoPixel::Color(0, 0, 128))       //blue
 #define CENTER_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 128, 128))  //white
 
-//predefined colors for the pixel associated with the button
-const uint32_t c_btn_color[NUM_BTNS] = {
-  [UP_BTN_IDX] = UP_PIXEL_COLOR,
-  [DOWN_BTN_IDX] = DOWN_PIXEL_COLOR,
-  [LEFT_BTN_IDX] = LEFT_PIXEL_COLOR,
-  [RIGHT_BTN_IDX] = RIGHT_PIXEL_COLOR,
-  [CENTER_BTN_IDX] = CENTER_PIXEL_COLOR,
-};
-
 // needs to be ordered correctly ...
 const uint32_t c_pixel_color[NUM_PIXELS] = {
   [LEFT_PIXEL_IDX] = LEFT_PIXEL_COLOR,
@@ -185,7 +176,6 @@ bool check_for_game_start() {
 bool present_wait_for_game_start() {
   clear_presentation();
   //blink the center button
-  // blink_pixels(CENTER_PIXEL_MASK, c_round_light_delay_ms, 1);
   //on
   int pixel_idx = CENTER_PIXEL_IDX;
   set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
@@ -392,23 +382,10 @@ void setup() {
 
   cross.setBrightness(32);
 
-  // for(int i = 0; i < NUM_PIXELS; ++i){
-  //   cross.setPixelColor(i, Adafruit_NeoPixel::Color(255, 0, 0));
-  //   cross.show();
-  //   delay(1000);
-  //   clear_pixels();
-  // }
-
-  // put your setup code here, to run once:
   reset_game();
 }
 
 void loop() {
-
-  // get_button_presses();  //should be called often to update the debounce
-  // return;
-
-  // put your main code here, to run repeatedly:
   switch (m_state) {
     case STATE_IDLE:
       if(present_wait_for_game_start()){
