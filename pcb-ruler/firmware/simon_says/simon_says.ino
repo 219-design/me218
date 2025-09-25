@@ -314,14 +314,6 @@ void present_start_game() {
   idle_time(250);
 }
 
-// presents successful round sound and display
-void present_successful_round() {
-  play_sound(SUCCESS_SOUND);
-  blink_pixels(GAME_PIXELS_MASK, c_round_light_delay_ms, 3);
-  clear_presentation();
-  idle_time(250);
-}
-
 // presents failed round sound and display
 void present_bad_round(uint32_t failed_round_num) {
   play_sound(BAD_BTN_SOUND);
@@ -410,7 +402,6 @@ void loop() {
         present_round();
         uint32_t failed_round_num = 0;
         if (player_turn(&failed_round_num)) {
-          // present_successful_round();
           advance_round();
         } else {
           present_bad_round(failed_round_num);
