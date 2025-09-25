@@ -9,6 +9,12 @@
 #define RIGHT_BTN_IDX 3
 #define CENTER_BTN_IDX 4
 
+#define UP_BTN_MASK (1 << UP_BTN_IDX)
+#define DOWN_BTN_MASK (1 << DOWN_BTN_IDX)
+#define LEFT_BTN_MASK (1 << LEFT_BTN_IDX)
+#define RIGHT_BTN_MASK (1 << RIGHT_BTN_IDX)
+#define CENTER_BTN_MASK (1 << CENTER_BTN_IDX)
+
 const int c_btn_pin[NUM_BTNS] = {
   [UP_BTN_IDX] = UP_BTN_PIN,
   [DOWN_BTN_IDX] = DOWN_BTN_PIN,
@@ -97,7 +103,7 @@ typedef enum {
 static e_state m_state = STATE_IDLE;
 #define START_BTN_MASK (CENTER_BTN_MASK)
 
-#define MAX_ROUNDS (20)
+#define MAX_ROUNDS (30)
 #define REPEAT_LIMIT (3)
 static int m_round = 0;
 static int m_repeat_cnt = 0;
@@ -404,7 +410,7 @@ void loop() {
         present_round();
         uint32_t failed_round_num = 0;
         if (player_turn(&failed_round_num)) {
-          present_successful_round();
+          // present_successful_round();
           advance_round();
         } else {
           present_bad_round(failed_round_num);
