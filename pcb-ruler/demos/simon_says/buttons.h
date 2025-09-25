@@ -20,6 +20,6 @@
 void buttons_init();
 
 //returns a set of debounce button states indicated by masks
-uint8_t buttons_get_presses();
+uint32_t buttons_get_presses();
 
 #endif  // BUTTONS_H_

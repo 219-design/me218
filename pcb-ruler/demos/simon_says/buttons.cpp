@@ -25,7 +25,7 @@ void buttons_init() {
 }
 
 //returns a set of debounce button states indicated by masks
-uint8_t buttons_get_presses() {
+uint32_t buttons_get_presses() {
   uint8_t ret_mask = 0;
   for (int idx = 0; idx < NUM_BTNS; ++idx) {
     int now = millis();
