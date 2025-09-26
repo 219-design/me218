@@ -180,15 +180,6 @@ bool player_turn(uint32_t* p_failed_round_num) {
   return true;
 }
 
-// presents start game sound and display
-void present_start_game() {
-  Serial.println("STARTING GAME");
-  play_sound(START_SOUND);
-  blink_pixels(GAME_PIXELS_MASK, c_blink_delay_ms, 5);
-  clear_presentation();
-  idle_time(250);
-}
-
 // presents failed round sound and display
 void present_bad_round(uint32_t failed_round_num) {
   show_display_failure();
@@ -289,7 +280,6 @@ void loop() {
   switch (m_state) {
     case STATE_IDLE:
       if (present_wait_for_game_start()) {
-        present_start_game();
         start_game();
         m_state = STATE_RUNNING;
       }
