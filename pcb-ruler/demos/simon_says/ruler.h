@@ -19,5 +19,8 @@
 
 #define NUM_BTNS (5)
 
+#define BTN_ASSERT_LEVEL 0
+#define BTN_DEASSERT_LEVEL 1
+
 //implemenation specific
 #define AUDIO_PIN (A0)

@@ -33,9 +33,30 @@ int get_pixel_index(uint8_t button_idx) {
   }
 }
 
+#define UP_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 0, 0))          //red
+#define DOWN_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 128, 0))      //yellow
+#define LEFT_PIXEL_COLOR (Adafruit_NeoPixel::Color(0, 128, 0))        //green
+#define RIGHT_PIXEL_COLOR (Adafruit_NeoPixel::Color(0, 0, 128))       //blue
+#define CENTER_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 128, 128))  //white
+
+// needs to be ordered correctly ...
+const uint32_t c_pixel_color[NUM_PIXELS] = {
+  [LEFT_PIXEL_IDX] = LEFT_PIXEL_COLOR,
+  [DOWN_PIXEL_IDX] = DOWN_PIXEL_COLOR,
+  [CENTER_PIXEL_IDX] = CENTER_PIXEL_COLOR,
+  [UP_PIXEL_IDX] = UP_PIXEL_COLOR,
+  [RIGHT_PIXEL_IDX] = RIGHT_PIXEL_COLOR,
+};
+
+static Pixels pixels = Pixels();
+
+#define GAME_PIXELS_MASK (UP_PIXEL_MASK | DOWN_PIXEL_MASK | LEFT_PIXEL_MASK | RIGHT_PIXEL_MASK)
+
+static Buttons buttons = Buttons();
+
 void set_btn_pixel(uint8_t btn_idx) {
   int pixel_idx = get_pixel_index(btn_idx);
-  set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
+  pixels.set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
 }
 
 //sound const/defines
@@ -74,7 +95,7 @@ Adafruit_SSD1306 display(kDisplayWidth, kDisplayHeight, &Wire, kOledReset);
 
 //returns status of player initiated game start
 bool check_for_game_start() {
-  uint8_t btns = buttons_get_presses();
+  uint8_t btns = buttons.get_presses();
   bool start = btns & START_BTN_MASK;
   if (start) {
     Serial.println("START PRESSED");
@@ -89,7 +110,7 @@ bool present_wait_for_game_start() {
   //blink the center button
   //on
   int pixel_idx = CENTER_PIXEL_IDX;
-  set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
+  pixels.set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
   int end = millis() + (c_blink_delay_ms / 2);
   while (millis() < end) {
     if (check_for_game_start()) {
@@ -97,7 +118,7 @@ bool present_wait_for_game_start() {
     }
   }
   //off
-  clear_pixels();
+  pixels.clear_pixels();
   end = millis() + (c_blink_delay_ms / 2);
   while (millis() < end) {
     if (check_for_game_start()) {
@@ -146,7 +167,7 @@ void present_player_button_press(uint8_t btn_mask) {
 
 //clears all presentation led and sound
 void clear_presentation() {
-  clear_pixels();
+  pixels.clear_pixels();
   play_sound(0);
 }
 
@@ -159,14 +180,14 @@ bool player_turn(uint32_t* p_failed_round_num) {
     uint8_t btns = 0;
     //wait for player button press
     do {
-      btns = buttons_get_presses();
+      btns = buttons.get_presses();
     } while (btns == 0);
     present_player_button_press(btns);
     correct = (btns & (1 << get_round_btn_idx(i))) ? true : false;
 
     //wait for buttons to stop pressing
     do {
-      btns = buttons_get_presses();
+      btns = buttons.get_presses();
     } while (btns != 0);
     clear_presentation();
 
@@ -187,7 +208,7 @@ void present_bad_round(uint32_t failed_round_num) {
   // blink the correct button
   int btn_idx = get_round_btn_idx(failed_round_num);
   int pixel_idx = get_pixel_index(btn_idx);
-  blink_pixels((1 << pixel_idx), c_blink_delay_ms, 5);
+  pixels.blink_pixels((1 << pixel_idx), c_blink_delay_ms, 5);
   clear_presentation();
   idle_time(250);
 }
@@ -198,7 +219,7 @@ void idle_time(uint32_t delay_ms) {
   int end = millis() + delay_ms;
   while (millis() < end) {
     //TODO: do everything that requires constant maintenance
-    buttons_get_presses();  //should be called often to update the debounce
+    buttons.get_presses();  //should be called often to update the debounce
   }
 }
 
@@ -255,9 +276,6 @@ void show_display_failure(){
 }
 
 void setup() {
-  buttons_init();
-  pixels_init();
-
   play_sound(0);
   pinMode(AUDIO_PIN, OUTPUT);
 
@@ -275,7 +293,7 @@ void setup() {
 }
 
 void loop() {
-  buttons_get_presses();  //keep this updated
+  buttons.get_presses();  //keep this updated
 
   switch (m_state) {
     case STATE_IDLE:

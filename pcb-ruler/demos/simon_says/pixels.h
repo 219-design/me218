@@ -10,19 +10,31 @@
 #define LEFT_PIXEL_MASK (1 << LEFT_PIXEL_IDX)
 #define RIGHT_PIXEL_MASK (1 << RIGHT_PIXEL_IDX)
 #define CENTER_PIXEL_MASK (1 << CENTER_PIXEL_IDX)
-#define GAME_PIXELS_MASK (UP_PIXEL_MASK | DOWN_PIXEL_MASK | LEFT_PIXEL_MASK | RIGHT_PIXEL_MASK)
 
-#define UP_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 0, 0))          //red
-#define DOWN_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 128, 0))      //yellow
-#define LEFT_PIXEL_COLOR (Adafruit_NeoPixel::Color(0, 128, 0))        //green
-#define RIGHT_PIXEL_COLOR (Adafruit_NeoPixel::Color(0, 0, 128))       //blue
-#define CENTER_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 128, 128))  //white
+class Pixels {
+public:
+  Pixels();
 
-extern const uint32_t c_pixel_color[];  //NUM_PIXELS
+  /** clears all pixels and displays them as blank
+  */
+  void clear_pixels();
 
-void pixels_init();
-void clear_pixels();
-void set_pixel(int idx, uint32_t color);
-void blink_pixels(uint8_t pixel_mask, int blink_duration_ms, int cnt);
+  /** Sets and shows pixel to given color
+  * idx - index of pixel to set
+  * color - uint32_t representation of color  
+  */
+  void set_pixel(int idx, uint32_t color);
+
+  /** blinks pixels in mask
+  * blink color is last set color of pixel
+  * @pixel_mask : logical OR of pixel masks
+  * @blink_duration_ms : duration to blink pixel (half duration on/off)
+  * @cnt : number of times to blink pixels
+  */
+  void blink_pixels(uint8_t pixel_mask, int blink_duration_ms, int cnt);
+private:
+ Adafruit_NeoPixel cross;
+};
+
 
 #endif  //PIXELS_H_

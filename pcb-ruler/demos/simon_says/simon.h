@@ -1,7 +1,7 @@
 #ifndef _SIMON_H_
 #define _SIMON_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 //gets the current round#
 uint32_t get_round_number();
