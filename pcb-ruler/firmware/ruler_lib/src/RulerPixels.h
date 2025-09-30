@@ -13,7 +13,7 @@
 
 class Pixels {
 public:
-  Pixels();
+  Pixels(int pixel_pin);
 
   /** clears all pixels and displays them as blank
   */

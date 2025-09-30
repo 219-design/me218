@@ -2,22 +2,23 @@
 
 #include <Arduino.h>
 
-const int c_btn_pin[NUM_BTNS] = {
-  [UP_BTN_IDX] = UP_BTN_PIN,
-  [DOWN_BTN_IDX] = DOWN_BTN_PIN,
-  [LEFT_BTN_IDX] = LEFT_BTN_PIN,
-  [RIGHT_BTN_IDX] = RIGHT_BTN_PIN,
-  [CENTER_BTN_IDX] = CENTER_BTN_PIN,
-};
+Buttons::Buttons(int center_btn_pin, int left_btn_pin, int right_btn_pin, int up_btn_pin, int down_btn_pin) {
 
-Buttons::Buttons() {
+  m_btn_pin[CENTER_BTN_IDX] = center_btn_pin;
+  m_btn_pin[LEFT_BTN_IDX] = left_btn_pin;
+  m_btn_pin[RIGHT_BTN_IDX] = right_btn_pin;
+  m_btn_pin[UP_BTN_IDX] = up_btn_pin;
+  m_btn_pin[DOWN_BTN_IDX] = down_btn_pin;
+
   for (int i = 0; i < NUM_BTNS; ++i) {
-    pinMode(c_btn_pin[i], INPUT_PULLUP);
+    if (m_btn_pin[i] != INVALID_PIN) {
+      pinMode(m_btn_pin[i], INPUT_PULLUP);
+    }
 
     m_last_btn_rd[i] = BTN_DEASSERT_LEVEL;
     m_last_btn_debounce_time[i] = 0;
     m_debounce_btn_val[i] = BTN_DEASSERT_LEVEL;
-  }  
+  }
 }
 
 //returns a set of debounce button states indicated by masks
@@ -25,7 +26,7 @@ uint32_t Buttons::get_presses() {
   uint8_t ret_mask = 0;
   for (int idx = 0; idx < NUM_BTNS; ++idx) {
     int now = millis();
-    int rd = digitalRead(c_btn_pin[idx]);
+    int rd = m_btn_pin[idx] != INVALID_PIN ? digitalRead(m_btn_pin[idx]) : BTN_DEASSERT_LEVEL;
     if (rd != m_last_btn_rd[idx]) {
       // Serial.printf("btn: %d : %d\r\n", idx, rd);
       m_last_btn_debounce_time[idx] = now;

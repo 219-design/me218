@@ -2,9 +2,11 @@
 
 #include <Arduino.h>
 
-Pixels::Pixels() {
-   cross = Adafruit_NeoPixel(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
-  cross.setBrightness(32);
+Pixels::Pixels(int pixel_pin) {
+	if(pixel_pin != INVALID_PIN){
+		cross = Adafruit_NeoPixel(NUM_PIXELS, pixel_pin, NEO_GRB + NEO_KHZ800);
+		cross.setBrightness(32);
+	}
 }
 
 //sets pixel value in cross
