@@ -1,13 +1,20 @@
-#include <RulerButtons.h>
-#include <RulerPixels.h>
-#include <ruler.h>
-
+#include "ruler.h"
+#include "RulerButtons.h"
+#include "RulerPixels.h"
 #include "simon.h"
 
 #include "Wire.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 //https://github.com/adafruit/Adafruit_SSD1306
+
+#define UP_BTN_PIN (10)
+#define DOWN_BTN_PIN (6)
+#define LEFT_BTN_PIN (9)
+#define RIGHT_BTN_PIN (7)
+#define CENTER_BTN_PIN (8)
+
+#define NEOPIXEL_PIN (3)
 
 const char* c_btn_name[NUM_BTNS] = {
   [UP_BTN_IDX] = "UP",
@@ -49,11 +56,11 @@ const uint32_t c_pixel_color[NUM_PIXELS] = {
   [RIGHT_PIXEL_IDX] = RIGHT_PIXEL_COLOR,
 };
 
-static Pixels pixels = Pixels();
+static Pixels pixels = Pixels(NEOPIXEL_PIN);
 
 #define GAME_PIXELS_MASK (UP_PIXEL_MASK | DOWN_PIXEL_MASK | LEFT_PIXEL_MASK | RIGHT_PIXEL_MASK)
 
-static Buttons buttons = Buttons();
+static Buttons buttons = Buttons(CENTER_BTN_PIN, LEFT_BTN_PIN, UP_BTN_PIN, DOWN_BTN_PIN, RIGHT_BTN_PIN);
 
 void set_btn_pixel(uint8_t btn_idx) {
   int pixel_idx = get_pixel_index(btn_idx);
@@ -88,9 +95,9 @@ static e_state m_state = STATE_IDLE;
 const int c_blink_delay_ms = 750;
 const int c_round_delay_ms = 1000;
 
-constexpr uint8_t kDisplayWidth{128};
-constexpr uint8_t kDisplayHeight{64};
-constexpr int8_t kOledReset{-1}; // No Reset Pin
+constexpr uint8_t kDisplayWidth{ 128 };
+constexpr uint8_t kDisplayHeight{ 64 };
+constexpr int8_t kOledReset{ -1 };  // No Reset Pin
 
 Adafruit_SSD1306 display(kDisplayWidth, kDisplayHeight, &Wire, kOledReset);
 
@@ -224,52 +231,52 @@ void idle_time(uint32_t delay_ms) {
   }
 }
 
-void show_display_wait(){
+void show_display_wait() {
   // Clear the buffer
   display.clearDisplay();
   // Set text color to white
-  display.setTextColor(SSD1306_WHITE); 
+  display.setTextColor(SSD1306_WHITE);
   // Set cursor position (column, row)
-  display.setCursor(0, 2); 
+  display.setCursor(0, 2);
 
-  display.setTextSize(1); 
+  display.setTextSize(1);
   display.println("press center 2 play");
 
-  display.setCursor(0, 20); 
- // Set text size
-  display.setTextSize(4); 
+  display.setCursor(0, 20);
+  // Set text size
+  display.setTextSize(4);
   // Print text
   display.println("SIMON");
 
   display.display();
 }
 
-void show_display_round(uint8_t round_num){
-    // Clear the buffer
+void show_display_round(uint8_t round_num) {
+  // Clear the buffer
   display.clearDisplay();
   // Set text color to white
-  display.setTextColor(SSD1306_WHITE); 
+  display.setTextColor(SSD1306_WHITE);
   // Set cursor position (column, row)
 
-  display.setCursor(0, 20); 
- // Set text size
-  display.setTextSize(2); 
+  display.setCursor(0, 20);
+  // Set text size
+  display.setTextSize(2);
   // Print text
   display.printf("ROUND %d\r\n", round_num);
 
   display.display();
 }
 
-void show_display_failure(){
-    // Clear the buffer
+void show_display_failure() {
+  // Clear the buffer
   display.clearDisplay();
   // Set text color to white
-  display.setTextColor(SSD1306_WHITE); 
+  display.setTextColor(SSD1306_WHITE);
   // Set cursor position (column, row)
 
-  display.setCursor(0, 20); 
- // Set text size
-  display.setTextSize(2); 
+  display.setCursor(0, 20);
+  // Set text size
+  display.setTextSize(2);
   // Print text
   display.println("OOPS!!");
 
@@ -285,7 +292,7 @@ void setup() {
   Serial.println("HELLO");
 
   // Initialize Display
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
   }
 
@@ -313,7 +320,7 @@ void loop() {
           present_bad_round(failed_round_num);
           end_game();
         }
-        idle_time(c_round_delay_ms/2);
+        idle_time(c_round_delay_ms / 2);
 
         if (game_over()) {
           show_display_wait();
