@@ -23,30 +23,3 @@ void Pixels::clear_pixels() {
   cross.show();
 }
 
-//blinks all set pixels in mask
-//duration is half on half off
-//duration is repeated cnt times
-void Pixels::blink_pixels(uint8_t pixel_mask, int blink_duration_ms, int cnt) {
-  //save pixel colors
-  uint32_t c[NUM_PIXELS] = {0};
-  for (int p = 0; p < NUM_PIXELS; ++p) {
-    cross.getPixelColor(p);
-  }
-
-  for (int i = 0; i < cnt; ++i) {
-    //on
-    for (int p = 0; p < NUM_PIXELS; ++p) {
-      if (pixel_mask & (1 << p)) {
-        set_pixel(p, c[p]);
-      }
-    }
-    delay(blink_duration_ms / 2); 
-    //off
-    for (int p = 0; p < NUM_PIXELS; ++p) {
-      if (pixel_mask & (1 << p)) {
-        set_pixel(p, 0);
-      }
-    }
-    delay(blink_duration_ms / 2); 
-  }
-}

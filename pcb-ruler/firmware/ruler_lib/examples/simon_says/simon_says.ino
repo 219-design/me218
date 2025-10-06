@@ -60,28 +60,51 @@ static Pixels pixels = Pixels(NEOPIXEL_PIN);
 
 #define GAME_PIXELS_MASK (UP_PIXEL_MASK | DOWN_PIXEL_MASK | LEFT_PIXEL_MASK | RIGHT_PIXEL_MASK)
 
-static Buttons buttons = Buttons(CENTER_BTN_PIN, LEFT_BTN_PIN, UP_BTN_PIN, DOWN_BTN_PIN, RIGHT_BTN_PIN);
+static Buttons buttons = Buttons(CENTER_BTN_PIN, LEFT_BTN_PIN, RIGHT_BTN_PIN, UP_BTN_PIN, DOWN_BTN_PIN);
 
 void set_btn_pixel(uint8_t btn_idx) {
   int pixel_idx = get_pixel_index(btn_idx);
   pixels.set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
 }
 
+//blinks all set pixels in mask
+//duration is half on half off
+//duration is repeated cnt times
+void blink_pixels(uint8_t pixel_mask, int blink_duration_ms, int cnt) {
+  for (int i = 0; i < cnt; ++i) {
+    //on
+    for (int p = 0; p < NUM_PIXELS; ++p) {
+      if (pixel_mask & (1 << p)) {
+        pixels.set_pixel(p, c_pixel_color[p]);
+      }
+    }
+    delay(blink_duration_ms / 2); 
+    //off
+    for (int p = 0; p < NUM_PIXELS; ++p) {
+      if (pixel_mask & (1 << p)) {
+        pixels.set_pixel(p, 0);
+      }
+    }
+    delay(blink_duration_ms / 2); 
+  }
+}
+
 //sound const/defines
 const uint32_t c_btn_sound[NUM_BTNS] = {
-  [UP_BTN_IDX] = 50,
-  [DOWN_BTN_IDX] = 100,
-  [LEFT_BTN_IDX] = 150,
-  [RIGHT_BTN_IDX] = 200,
-  [CENTER_BTN_IDX] = 300,
+  [UP_BTN_IDX] = 440,
+  [DOWN_BTN_IDX] = 554,
+  [LEFT_BTN_IDX] = 165,
+  [RIGHT_BTN_IDX] = 330,
+  [CENTER_BTN_IDX] = 262,
 };
-#define START_SOUND 900
-#define BAD_BTN_SOUND 1000
-#define SUCCESS_SOUND 2000
+#define START_SOUND 262
+#define BAD_BTN_SOUND 78
+#define SUCCESS_SOUND 524
 
 //plays sound on speaker
 void play_sound(uint32_t sound) {
-  analogWrite(AUDIO_PIN, sound);
+  // analogWrite(AUDIO_PIN, sound);
+  tone(AUDIO_PIN, sound);
 }
 
 typedef enum {
@@ -173,10 +196,15 @@ void present_player_button_press(uint8_t btn_mask) {
   }
 }
 
+void stop_sound() {
+  noTone(AUDIO_PIN);
+  analogWrite(AUDIO_PIN, 0);
+}
+
 //clears all presentation led and sound
 void clear_presentation() {
   pixels.clear_pixels();
-  play_sound(0);
+  stop_sound();
 }
 
 //returns status of player correctness in their play for the full round
@@ -216,7 +244,8 @@ void present_bad_round(uint32_t failed_round_num) {
   // blink the correct button
   int btn_idx = get_round_btn_idx(failed_round_num);
   int pixel_idx = get_pixel_index(btn_idx);
-  pixels.blink_pixels((1 << pixel_idx), c_blink_delay_ms, 5);
+  Serial.printf("FAIL: %d %d %d\r\n", failed_round_num, btn_idx, pixel_idx);
+  blink_pixels((1 << pixel_idx), c_blink_delay_ms / 2, 5);
   clear_presentation();
   idle_time(250);
 }
@@ -284,8 +313,8 @@ void show_display_failure() {
 }
 
 void setup() {
-  play_sound(0);
   pinMode(AUDIO_PIN, OUTPUT);
+  stop_sound();
 
   Serial.begin(115200);
 
@@ -298,6 +327,7 @@ void setup() {
 
   show_display_wait();
   reset_game();
+  m_state = STATE_IDLE;
 }
 
 void loop() {
@@ -305,6 +335,7 @@ void loop() {
 
   switch (m_state) {
     case STATE_IDLE:
+      Serial.println("wait for start");
       if (present_wait_for_game_start()) {
         start_game();
         m_state = STATE_RUNNING;
@@ -320,7 +351,7 @@ void loop() {
           present_bad_round(failed_round_num);
           end_game();
         }
-        idle_time(c_round_delay_ms / 2);
+        idle_time(c_round_delay_ms / 4);
 
         if (game_over()) {
           show_display_wait();

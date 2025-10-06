@@ -17,7 +17,7 @@ Buttons::Buttons(int center_btn_pin, int left_btn_pin, int right_btn_pin, int up
 
     m_last_btn_rd[i] = BTN_DEASSERT_LEVEL;
     m_last_btn_debounce_time[i] = 0;
-    m_debounce_btn_val[i] = BTN_DEASSERT_LEVEL;
+    m_debounce_btn_val[i] = 0;
   }
 }
 

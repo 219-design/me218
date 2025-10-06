@@ -25,13 +25,6 @@ public:
   */
   void set_pixel(int idx, uint32_t color);
 
-  /** blinks pixels in mask
-  * blink color is last set color of pixel
-  * @pixel_mask : logical OR of pixel masks
-  * @blink_duration_ms : duration to blink pixel (half duration on/off)
-  * @cnt : number of times to blink pixels
-  */
-  void blink_pixels(uint8_t pixel_mask, int blink_duration_ms, int cnt);
 private:
  Adafruit_NeoPixel cross;
 };
