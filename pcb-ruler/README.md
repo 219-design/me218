@@ -7,6 +7,6 @@ Brainstormed projects
 - Motion Detection - Halloween Decoration
 - Much More...
 
-Want to see the projects we've made so far? Check out the [examples folder](.\firmware\ruler_lib\examples).
+Want to see the projects we've made so far? Check out the [examples folder](firmware\ruler_lib\examples).
 
 
