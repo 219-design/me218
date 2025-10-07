@@ -1,0 +1,366 @@
+#include "ruler.h"
+#include "RulerButtons.h"
+#include "RulerPixels.h"
+#include "simon.h"
+
+#include "Wire.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+//https://github.com/adafruit/Adafruit_SSD1306
+
+#define UP_BTN_PIN (10)
+#define DOWN_BTN_PIN (6)
+#define LEFT_BTN_PIN (9)
+#define RIGHT_BTN_PIN (7)
+#define CENTER_BTN_PIN (8)
+
+#define NEOPIXEL_PIN (3)
+
+const char* c_btn_name[NUM_BTNS] = {
+  [UP_BTN_IDX] = "UP",
+  [DOWN_BTN_IDX] = "DOWN",
+  [LEFT_BTN_IDX] = "LEFT",
+  [RIGHT_BTN_IDX] = "RIGHT",
+  [CENTER_BTN_IDX] = "CENTER",
+};
+
+int get_pixel_index(uint8_t button_idx) {
+  switch (button_idx) {
+    case UP_BTN_IDX:
+      return UP_PIXEL_IDX;
+    case DOWN_BTN_IDX:
+      return DOWN_PIXEL_IDX;
+    case LEFT_BTN_IDX:
+      return LEFT_PIXEL_IDX;
+    case RIGHT_BTN_IDX:
+      return RIGHT_PIXEL_IDX;
+    case CENTER_BTN_IDX:
+      return CENTER_PIXEL_IDX;
+    default:
+      return -1;
+  }
+}
+
+#define UP_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 0, 0))          //red
+#define DOWN_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 128, 0))      //yellow
+#define LEFT_PIXEL_COLOR (Adafruit_NeoPixel::Color(0, 128, 0))        //green
+#define RIGHT_PIXEL_COLOR (Adafruit_NeoPixel::Color(0, 0, 128))       //blue
+#define CENTER_PIXEL_COLOR (Adafruit_NeoPixel::Color(128, 128, 128))  //white
+
+// needs to be ordered correctly ...
+const uint32_t c_pixel_color[NUM_PIXELS] = {
+  [LEFT_PIXEL_IDX] = LEFT_PIXEL_COLOR,
+  [DOWN_PIXEL_IDX] = DOWN_PIXEL_COLOR,
+  [CENTER_PIXEL_IDX] = CENTER_PIXEL_COLOR,
+  [UP_PIXEL_IDX] = UP_PIXEL_COLOR,
+  [RIGHT_PIXEL_IDX] = RIGHT_PIXEL_COLOR,
+};
+
+static Pixels pixels = Pixels(NEOPIXEL_PIN);
+
+#define GAME_PIXELS_MASK (UP_PIXEL_MASK | DOWN_PIXEL_MASK | LEFT_PIXEL_MASK | RIGHT_PIXEL_MASK)
+
+static Buttons buttons = Buttons(CENTER_BTN_PIN, LEFT_BTN_PIN, RIGHT_BTN_PIN, UP_BTN_PIN, DOWN_BTN_PIN);
+
+void set_btn_pixel(uint8_t btn_idx) {
+  int pixel_idx = get_pixel_index(btn_idx);
+  pixels.set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
+}
+
+//blinks all set pixels in mask
+//duration is half on half off
+//duration is repeated cnt times
+void blink_pixels(uint8_t pixel_mask, int blink_duration_ms, int cnt) {
+  for (int i = 0; i < cnt; ++i) {
+    //on
+    for (int p = 0; p < NUM_PIXELS; ++p) {
+      if (pixel_mask & (1 << p)) {
+        pixels.set_pixel(p, c_pixel_color[p]);
+      }
+    }
+    delay(blink_duration_ms / 2); 
+    //off
+    for (int p = 0; p < NUM_PIXELS; ++p) {
+      if (pixel_mask & (1 << p)) {
+        pixels.set_pixel(p, 0);
+      }
+    }
+    delay(blink_duration_ms / 2); 
+  }
+}
+
+//sound const/defines
+const uint32_t c_btn_sound[NUM_BTNS] = {
+  [UP_BTN_IDX] = 440,
+  [DOWN_BTN_IDX] = 554,
+  [LEFT_BTN_IDX] = 165,
+  [RIGHT_BTN_IDX] = 330,
+  [CENTER_BTN_IDX] = 262,
+};
+#define START_SOUND 262
+#define BAD_BTN_SOUND 78
+#define SUCCESS_SOUND 524
+
+//plays sound on speaker
+void play_sound(uint32_t sound) {
+  // analogWrite(AUDIO_PIN, sound);
+  tone(AUDIO_PIN, sound);
+}
+
+typedef enum {
+  STATE_IDLE = 0,
+  STATE_RUNNING
+} e_state;
+
+static e_state m_state = STATE_IDLE;
+#define START_BTN_MASK (CENTER_BTN_MASK)
+
+const int c_blink_delay_ms = 750;
+const int c_round_delay_ms = 1000;
+
+constexpr uint8_t kDisplayWidth{ 128 };
+constexpr uint8_t kDisplayHeight{ 64 };
+constexpr int8_t kOledReset{ -1 };  // No Reset Pin
+
+Adafruit_SSD1306 display(kDisplayWidth, kDisplayHeight, &Wire, kOledReset);
+
+//returns status of player initiated game start
+bool check_for_game_start() {
+  uint8_t btns = buttons.get_presses();
+  bool start = btns & START_BTN_MASK;
+  if (start) {
+    Serial.println("START PRESSED");
+  }
+  return start;
+}
+
+//presents game start
+//returns if game started by player
+bool present_wait_for_game_start() {
+  clear_presentation();
+  //blink the center button
+  //on
+  int pixel_idx = CENTER_PIXEL_IDX;
+  pixels.set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
+  int end = millis() + (c_blink_delay_ms / 2);
+  while (millis() < end) {
+    if (check_for_game_start()) {
+      return true;
+    }
+  }
+  //off
+  pixels.clear_pixels();
+  end = millis() + (c_blink_delay_ms / 2);
+  while (millis() < end) {
+    if (check_for_game_start()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+//presents round
+//the pattern of the leds is shown as one pixel on at a time in sequence
+void present_round() {
+  uint32_t round_num = get_round_number();
+  Serial.printf("ROUND %d\r\n", round_num);
+
+  show_display_round(round_num);
+  idle_time(500);
+
+  // set of pixel sequences are displayed
+  clear_presentation();
+  int show_duration_ms = get_round_show_duration_ms();
+  for (int i = 0; i < round_num; ++i) {
+    int btn_idx = get_round_btn_idx(i);
+    Serial.printf("%s ", c_btn_name[btn_idx]);
+    play_sound(c_btn_sound[btn_idx]);
+    set_btn_pixel(btn_idx);
+    idle_time(show_duration_ms);
+    clear_presentation();
+    idle_time(100);
+  }
+  Serial.println();
+}
+
+//presents the button the player has pressed from btn mask
+void present_player_button_press(uint8_t btn_mask) {
+  clear_presentation();
+  for (int i = 0; i < NUM_BTNS - 1; ++i) {
+    if (btn_mask & (1 << i)) {
+      Serial.printf("PLAYER PRESS : %s\r\n", c_btn_name[i]);
+      set_btn_pixel(i);
+      play_sound(c_btn_sound[i]);
+      return;
+    }
+  }
+}
+
+void stop_sound() {
+  noTone(AUDIO_PIN);
+  analogWrite(AUDIO_PIN, 0);
+}
+
+//clears all presentation led and sound
+void clear_presentation() {
+  pixels.clear_pixels();
+  stop_sound();
+}
+
+//returns status of player correctness in their play for the full round
+//parameter is failed round# (0 indexed) if failed
+bool player_turn(uint32_t* p_failed_round_num) {
+  uint32_t round_num = get_round_number();
+  for (int i = 0; i < round_num; ++i) {
+    bool correct = false;
+    uint8_t btns = 0;
+    //wait for player button press
+    do {
+      btns = buttons.get_presses();
+    } while (btns == 0);
+    present_player_button_press(btns);
+    correct = (btns & (1 << get_round_btn_idx(i))) ? true : false;
+
+    //wait for buttons to stop pressing
+    do {
+      btns = buttons.get_presses();
+    } while (btns != 0);
+    clear_presentation();
+
+    if (correct) {
+      continue;
+    } else {
+      *p_failed_round_num = i;
+      return false;
+    }
+  }
+  return true;
+}
+
+// presents failed round sound and display
+void present_bad_round(uint32_t failed_round_num) {
+  show_display_failure();
+  play_sound(BAD_BTN_SOUND);
+  // blink the correct button
+  int btn_idx = get_round_btn_idx(failed_round_num);
+  int pixel_idx = get_pixel_index(btn_idx);
+  Serial.printf("FAIL: %d %d %d\r\n", failed_round_num, btn_idx, pixel_idx);
+  blink_pixels((1 << pixel_idx), c_blink_delay_ms / 2, 5);
+  clear_presentation();
+  idle_time(250);
+}
+
+// busy wait for provided time
+// processes that need to be monitored/kicked are handled here
+void idle_time(uint32_t delay_ms) {
+  int end = millis() + delay_ms;
+  while (millis() < end) {
+    //TODO: do everything that requires constant maintenance
+    buttons.get_presses();  //should be called often to update the debounce
+  }
+}
+
+void show_display_wait() {
+  // Clear the buffer
+  display.clearDisplay();
+  // Set text color to white
+  display.setTextColor(SSD1306_WHITE);
+  // Set cursor position (column, row)
+  display.setCursor(0, 2);
+
+  display.setTextSize(1);
+  display.println("press center 2 play");
+
+  display.setCursor(0, 20);
+  // Set text size
+  display.setTextSize(4);
+  // Print text
+  display.println("SIMON");
+
+  display.display();
+}
+
+void show_display_round(uint8_t round_num) {
+  // Clear the buffer
+  display.clearDisplay();
+  // Set text color to white
+  display.setTextColor(SSD1306_WHITE);
+  // Set cursor position (column, row)
+
+  display.setCursor(0, 20);
+  // Set text size
+  display.setTextSize(2);
+  // Print text
+  display.printf("ROUND %d\r\n", round_num);
+
+  display.display();
+}
+
+void show_display_failure() {
+  // Clear the buffer
+  display.clearDisplay();
+  // Set text color to white
+  display.setTextColor(SSD1306_WHITE);
+  // Set cursor position (column, row)
+
+  display.setCursor(0, 20);
+  // Set text size
+  display.setTextSize(2);
+  // Print text
+  display.println("OOPS!!");
+
+  display.display();
+}
+
+void setup() {
+  pinMode(AUDIO_PIN, OUTPUT);
+  stop_sound();
+
+  Serial.begin(115200);
+
+  Serial.println("HELLO");
+
+  // Initialize Display
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("SSD1306 allocation failed"));
+  }
+
+  show_display_wait();
+  reset_game();
+  m_state = STATE_IDLE;
+}
+
+void loop() {
+  buttons.get_presses();  //keep this updated
+
+  switch (m_state) {
+    case STATE_IDLE:
+      Serial.println("wait for start");
+      if (present_wait_for_game_start()) {
+        start_game();
+        m_state = STATE_RUNNING;
+      }
+      break;
+    case STATE_RUNNING:
+      {
+        present_round();
+        uint32_t failed_round_num = 0;
+        if (player_turn(&failed_round_num)) {
+          advance_round();
+        } else {
+          present_bad_round(failed_round_num);
+          end_game();
+        }
+        idle_time(c_round_delay_ms / 4);
+
+        if (game_over()) {
+          show_display_wait();
+          reset_game();
+          m_state = STATE_IDLE;
+        }
+        break;
+      }
+    default:
+      break;
+  }
+}
