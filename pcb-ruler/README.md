@@ -7,6 +7,7 @@ Brainstormed projects
 - Motion Detection - Halloween Decoration
 - Much More...
 
-Want to see the projects we've made so far? Check out the [examples folder](firmware\ruler_lib\examples).
+Want to see the projects we've made so far? Check out the [examples folder]([pcb-ruler folder](https://github.com/219-design/me218/tree/pcb-ruler/lib/pcb-ruler)
+/firmware/ruler_lib/examples).
 
 
