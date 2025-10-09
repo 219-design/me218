@@ -1,0 +1,52 @@
+Altium Designer Pick and Place Locations
+C:\Users\kykypi\AppData\Local\TempReleases\Snapshot\1\Assembly Standard\PickPlace\ME218 Ruler v1 XY_PickPlace.csv
+
+========================================================================================================================
+File Design Information:
+
+Date:       05/09/25
+Time:       17:09
+Revision:   Not in VersionControl
+Variant:    Standard
+Units used: mil
+
+"Designator","Comment","Layer","Footprint","Center-X(mil)","Center-Y(mil)","Rotation","Description"
+"P9","HDR 06 POS 100mil 2.54mm","TopLayer","HDR_06_POS_100mil_2.54mm","4908.268","787.402","270","HDR 06 POS 100mil 2.54mm"
+"U5","1655 NeoPixel 5050 RGB LED","TopLayer","ADA-RGB-1655_V","3464.567","1087.402","0","NeoPixel 5050 RGB LED with Integrated Driver Chip - 10 Pack"
+"U6","1655 NeoPixel 5050 RGB LED","TopLayer","ADA-RGB-1655_V","3764.567","787.402","270","NeoPixel 5050 RGB LED with Integrated Driver Chip - 10 Pack"
+"C4","Multilayer Ceramic Capacitor, 1 uF, 50 V, ± 10%, X7R, 0805","TopLayer","FP-GRM21B-0_15-IPC_B","2992.240","537.751","90","Multilayer Ceramic Capacitor, 1 uF, 50 V, ± 10%, X7R, 0805 [2012 Metric]"
+"U4","1655 NeoPixel 5050 RGB LED","TopLayer","ADA-RGB-1655_V","3464.567","787.402","0","NeoPixel 5050 RGB LED with Integrated Driver Chip - 10 Pack"
+"U3","1655 NeoPixel 5050 RGB LED","TopLayer","ADA-RGB-1655_V","3464.567","487.402","0","NeoPixel 5050 RGB LED with Integrated Driver Chip - 10 Pack"
+"U2","1655 NeoPixel 5050 RGB LED","TopLayer","ADA-RGB-1655_V","3164.567","787.402","270","NeoPixel 5050 RGB LED with Integrated Driver Chip - 10 Pack"
+"MH10","2.7mm hole","TopLayer","2.7mm_hole_(no_keepout)","2122.458","1248.829","0","2.7mm hole (no keepout) M2.5 tight"
+"MH9","2.7mm hole","TopLayer","2.7mm_hole_(no_keepout)","1996.474","944.892","0","2.7mm hole (no keepout) M2.5 tight"
+"MH8","2.7mm hole","TopLayer","2.7mm_hole_(no_keepout)","1796.474","683.868","0","2.7mm hole (no keepout) M2.5 tight"
+"MH7","2.7mm hole","TopLayer","2.7mm_hole_(no_keepout)","1535.450","483.868","0","2.7mm hole (no keepout) M2.5 tight"
+"MH6","2.7mm hole","TopLayer","2.7mm_hole_(no_keepout)","1231.513","357.884","0","2.7mm hole (no keepout) M2.5 tight"
+"MH5","2.7mm hole","TopLayer","2.7mm_hole_(no_keepout)","905.529","314.970","0","2.7mm hole (no keepout) M2.5 tight"
+"C3","Multilayer Ceramic Capacitor, 1 uF, 50 V, ± 10%, X7R, 0805","TopLayer","FP-GRM21B-0_15-IPC_B","7071.390","1500.000","0","Multilayer Ceramic Capacitor, 1 uF, 50 V, ± 10%, X7R, 0805 [2012 Metric]"
+"C2","Multilayer Ceramic Capacitor, 1 uF, 50 V, ± 10%, X7R, 0805","TopLayer","FP-GRM21B-0_15-IPC_B","6947.515","621.703","0","Multilayer Ceramic Capacitor, 1 uF, 50 V, ± 10%, X7R, 0805 [2012 Metric]"
+"C1","Multilayer Ceramic Capacitor, 1 uF, 50 V, ± 10%, X7R, 0805","TopLayer","FP-GRM21B-0_15-IPC_B","7277.013","1259.835","270","Multilayer Ceramic Capacitor, 1 uF, 50 V, ± 10%, X7R, 0805 [2012 Metric]"
+"P17","S2B-PH-K-S(LF)(SN)","BottomLayer","JST-S2B-PH-K-S_V","95.882","1439.967","270","Header for PCB; pitch 2.00mm; 2-contacts; THT; male; side entry; 100V/2A"
+"J2","ProtoPads","TopLayer","New_footprint_1","6195.268","660.881","0","Soldermask defined 27 x 7 SMT Pads Array Solder Mask Defined 50 mil and 25 mil pitch 0.7mm pad"
+"J1","QWIIC JST CONNECTOR","TopLayer","SPARKFUN_PRT-14417","7399.700","1436.925","180","QWIIC JST CONNECTOR - SMD 4-PIN"
+"D2","LYR976-PS-36","TopLayer","FP-LS_R976-MFG","7189.336","1136.674","90","0805 Single Color LED, Yellow, Colorless Diffused, 1.3mm"
+"D1","LSR976-NR-1","TopLayer","FP-LS_R976-MFG","6809.561","1138.167","90","0805 Single Color LED, Super Red, Colorless Diffused, 1.3mm"
+"LEFT","TL3305AF260QG","TopLayer","FP-TL3305AF260QG-MFG","2219.685","787.402","90","Keypad Switch, 1 Switches, SPST, Momentary-tactile, 0.05A, 12VDC, 2.45N, Solder Terminal, Surface Mount-straight"
+"UP","TL3305AF260QG","TopLayer","FP-TL3305AF260QG-MFG","2519.685","1087.402","180","Keypad Switch, 1 Switches, SPST, Momentary-tactile, 0.05A, 12VDC, 2.45N, Solder Terminal, Surface Mount-straight"
+"P5","HDR 08 POS 100mil 2.54mm","TopLayer","HDR_08_POS_100mil_2.54mm_no_outline","7000.000","1050.000","90","HDR 08 POS 100mil 2.54mm"
+"P4","HDR 08 POS 100mil 2.54mm","TopLayer","HDR_08_POS_100mil_2.54mm_no_outline","7100.000","1050.000","90","HDR 08 POS 100mil 2.54mm"
+"P3","HDR 08 POS 100mil 2.54mm","TopLayer","HDR_08_POS_100mil_2.54mm_no_outline","6900.000","1050.000","90","HDR 08 POS 100mil 2.54mm"
+"P2","HDR 11 POS 100mil 2.54mm","TopLayer","HDR_11_POS_100mil_2.54mm_no_outline","7799.952","799.885","90","HDR 11 POS 100mil 2.54mm"
+"MH3","PTH 4-40 Close Fit","TopLayer","mount_hole_4-40_Close","4778.583","1237.402","0","4-40 PAN HEAD SCREW CLOSE FIT"
+"U1","Seeedstudio XIAO","TopLayer","Seeeduino_XIAO-Footprint-Both","476.488","787.402","90","Seeed studio XIAO series dev boards"
+"CENTER","TL3305AF260QG","TopLayer","FP-TL3305AF260QG-MFG","2519.685","787.402","180","Keypad Switch, 1 Switches, SPST, Momentary-tactile, 0.05A, 12VDC, 2.45N, Solder Terminal, Surface Mount-straight"
+"DOWN","TL3305AF260QG","TopLayer","FP-TL3305AF260QG-MFG","2519.685","487.402","180","Keypad Switch, 1 Switches, SPST, Momentary-tactile, 0.05A, 12VDC, 2.45N, Solder Terminal, Surface Mount-straight"
+"RIGHT","TL3305AF260QG","TopLayer","FP-TL3305AF260QG-MFG","2819.685","787.402","90","Keypad Switch, 1 Switches, SPST, Momentary-tactile, 0.05A, 12VDC, 2.45N, Solder Terminal, Surface Mount-straight"
+"R2","SMD Chip Resistor, 130 Ohm, ±1%, 125 mW, 0805","TopLayer","RESC2013X60X35NL10T20","7183.699","1300.862","270","SMD Chip Resistor, 130 Ohm, ± 1%, 125 mW, 0805 [2012 Metric], Thick Film, Automotive"
+"R1","SMD Chip Resistor, 300 Ohm, ± 1%, 125 mW, 0805","TopLayer","RESC2013X60X35NL10T20","6803.923","1308.697","270","SMD Chip Resistor, 300 Ohm, ± 1%, 125 mW, 0805 [2012 Metric], Thin Film, General Purpose"
+"P7","HDR 11 POS 100mil 2.54mm","TopLayer","HDR_11_POS_100mil_2.54mm_no_outline","6199.889","1400.048","0","HDR 11 POS 100mil 2.54mm"
+"P6","HDR 13 POS 100mil 2.54mm","TopLayer","HDR_13_POS_100mil_2.54mm_No_Outline","8500.004","900.000","90","HDR 13 POS 100mil 2.54mm"
+"P1","HDR 11 POS 100mil 2.54mm","TopLayer","HDR_11_POS_100mil_2.54mm_no_outline","7899.956","799.885","90","HDR 11 POS 100mil 2.54mm"
+"P8","HDR 06 POS 100mil 2.54mm","TopLayer","HDR_06_POS_100mil_2.54mm","4798.425","787.402","270","HDR 06 POS 100mil 2.54mm"
+"MH4","PTH 4-40 Close Fit","TopLayer","mount_hole_4-40_Close","3837.638","1237.402","270","4-40 PAN HEAD SCREW CLOSE FIT"
