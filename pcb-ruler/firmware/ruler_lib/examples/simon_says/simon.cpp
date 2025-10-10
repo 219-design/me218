@@ -74,7 +74,7 @@ void end_game() {
 }
 
 //returns status of if game is over
-bool game_over() {
+bool is_game_over() {
   return !m_game_running;
 }
 

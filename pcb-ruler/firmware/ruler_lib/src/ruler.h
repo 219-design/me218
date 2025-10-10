@@ -16,9 +16,6 @@
 #define BTN_ASSERT_LEVEL 0
 #define BTN_DEASSERT_LEVEL 1
 
-//implemenation specific
-#define AUDIO_PIN (A0)
-
 #define INVALID_PIN (-1)
 
 #endif //RULER_H_

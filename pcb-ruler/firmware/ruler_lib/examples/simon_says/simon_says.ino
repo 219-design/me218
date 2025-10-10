@@ -1,12 +1,20 @@
 #include "ruler.h"
 #include "RulerButtons.h"
-#include "RulerPixels.h"
 #include "simon.h"
+
+#include <Adafruit_NeoPixel.h>
+//https://github.com/adafruit/Adafruit_NeoPixel
 
 #include "Wire.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 //https://github.com/adafruit/Adafruit_SSD1306
+
+#define UP_PIXEL_MASK (1 << UP_PIXEL_IDX)
+#define DOWN_PIXEL_MASK (1 << DOWN_PIXEL_IDX)
+#define LEFT_PIXEL_MASK (1 << LEFT_PIXEL_IDX)
+#define RIGHT_PIXEL_MASK (1 << RIGHT_PIXEL_IDX)
+#define CENTER_PIXEL_MASK (1 << CENTER_PIXEL_IDX)
 
 #define UP_BTN_PIN (10)
 #define DOWN_BTN_PIN (6)
@@ -16,6 +24,8 @@
 
 #define NEOPIXEL_PIN (3)
 
+#define AUDIO_PIN (A0)
+
 const char* c_btn_name[NUM_BTNS] = {
   [UP_BTN_IDX] = "UP",
   [DOWN_BTN_IDX] = "DOWN",
@@ -24,6 +34,11 @@ const char* c_btn_name[NUM_BTNS] = {
   [CENTER_BTN_IDX] = "CENTER",
 };
 
+/** 
+ * converts button index to associated pixel index 
+ * @button_idx - button index as defined in RulerButtons.h
+ * @return associated pixel index if button_idx is valid, -1 otherwise
+ */
 int get_pixel_index(uint8_t button_idx) {
   switch (button_idx) {
     case UP_BTN_IDX:
@@ -56,35 +71,50 @@ const uint32_t c_pixel_color[NUM_PIXELS] = {
   [RIGHT_PIXEL_IDX] = RIGHT_PIXEL_COLOR,
 };
 
-static Pixels pixels = Pixels(NEOPIXEL_PIN);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 #define GAME_PIXELS_MASK (UP_PIXEL_MASK | DOWN_PIXEL_MASK | LEFT_PIXEL_MASK | RIGHT_PIXEL_MASK)
 
 static Buttons buttons = Buttons(CENTER_BTN_PIN, LEFT_BTN_PIN, RIGHT_BTN_PIN, UP_BTN_PIN, DOWN_BTN_PIN);
 
+/**
+ * sets pixel associated with button to associated button color
+ * @btn_idx - button index as defined in RulerButtons.h
+ */
 void set_btn_pixel(uint8_t btn_idx) {
   int pixel_idx = get_pixel_index(btn_idx);
-  pixels.set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
+  if(-1 != pixel_idx){
+    pixels.setPixelColor(pixel_idx, c_pixel_color[pixel_idx]);
+    pixels.show();  
+  }
 }
 
-//blinks all set pixels in mask
-//duration is half on half off
-//duration is repeated cnt times
-void blink_pixels(uint8_t pixel_mask, int blink_duration_ms, int cnt) {
+/*
+ * blinks all set pixels in mask
+ * duration is half on half off
+ * duration is repeated cnt times
+ * @pixel_mask - logical OR of pixel masks
+ * @blink_duration_ms - total duration of a blink (on + off)
+ * @cnt - number of times a blink duration occrs
+ */
+void blink_pixels(uint8_t pixel_mask, uint32_t blink_duration_ms, uint8_t cnt) {
   for (int i = 0; i < cnt; ++i) {
     //on
     for (int p = 0; p < NUM_PIXELS; ++p) {
       if (pixel_mask & (1 << p)) {
-        pixels.set_pixel(p, c_pixel_color[p]);
+        pixels.setPixelColor(p, c_pixel_color[p]);
       }
     }
+    pixels.show();  
+
     delay(blink_duration_ms / 2); 
     //off
     for (int p = 0; p < NUM_PIXELS; ++p) {
       if (pixel_mask & (1 << p)) {
-        pixels.set_pixel(p, 0);
+        pixels.setPixelColor(p, 0);
       }
     }
+    pixels.show();  
     delay(blink_duration_ms / 2); 
   }
 }
@@ -101,9 +131,11 @@ const uint32_t c_btn_sound[NUM_BTNS] = {
 #define BAD_BTN_SOUND 78
 #define SUCCESS_SOUND 524
 
-//plays sound on speaker
+/**
+ * plays sound on speaker
+ * call stop_sound() to stop sound
+ */
 void play_sound(uint32_t sound) {
-  // analogWrite(AUDIO_PIN, sound);
   tone(AUDIO_PIN, sound);
 }
 
@@ -124,7 +156,10 @@ constexpr int8_t kOledReset{ -1 };  // No Reset Pin
 
 Adafruit_SSD1306 display(kDisplayWidth, kDisplayHeight, &Wire, kOledReset);
 
-//returns status of player initiated game start
+/**
+ * checks if user has initiated game start
+ * @return - true if user iniated game start
+*/
 bool check_for_game_start() {
   uint8_t btns = buttons.get_presses();
   bool start = btns & START_BTN_MASK;
@@ -134,14 +169,27 @@ bool check_for_game_start() {
   return start;
 }
 
-//presents game start
-//returns if game started by player
+/**
+ * clears all pixels
+ */
+void clear_pixels(){
+  for (int i = 0; i < NUM_PIXELS; ++i) {
+    pixels.setPixelColor(i, 0);
+  }
+  pixels.show();  
+}
+
+/**
+ * presents wait for game start on leds/display
+ * @return - true if user iniated game start during presentation, false otherwise
+*/
 bool present_wait_for_game_start() {
   clear_presentation();
   //blink the center button
   //on
   int pixel_idx = CENTER_PIXEL_IDX;
-  pixels.set_pixel(pixel_idx, c_pixel_color[pixel_idx]);
+  pixels.setPixelColor(pixel_idx, c_pixel_color[pixel_idx]);
+  pixels.show();  
   int end = millis() + (c_blink_delay_ms / 2);
   while (millis() < end) {
     if (check_for_game_start()) {
@@ -149,7 +197,7 @@ bool present_wait_for_game_start() {
     }
   }
   //off
-  pixels.clear_pixels();
+  clear_pixels();
   end = millis() + (c_blink_delay_ms / 2);
   while (millis() < end) {
     if (check_for_game_start()) {
@@ -159,8 +207,10 @@ bool present_wait_for_game_start() {
   return false;
 }
 
-//presents round
-//the pattern of the leds is shown as one pixel on at a time in sequence
+/**
+ * presents round
+ * the preselected pattern will present on the leds in sequence
+ */
 void present_round() {
   uint32_t round_num = get_round_number();
   Serial.printf("ROUND %d\r\n", round_num);
@@ -183,7 +233,10 @@ void present_round() {
   Serial.println();
 }
 
-//presents the button the player has pressed from btn mask
+/**
+ * presents player's button press with assicated led
+ * @btn_mask - logical OR of any of the button masks defined in RulerButtons.h
+*/
 void present_player_button_press(uint8_t btn_mask) {
   clear_presentation();
   for (int i = 0; i < NUM_BTNS - 1; ++i) {
@@ -196,19 +249,29 @@ void present_player_button_press(uint8_t btn_mask) {
   }
 }
 
+/**
+ * stops sound on speaker
+ */
 void stop_sound() {
   noTone(AUDIO_PIN);
   analogWrite(AUDIO_PIN, 0);
 }
 
-//clears all presentation led and sound
+/**
+ * clears led presentation and stops sound
+ */
 void clear_presentation() {
-  pixels.clear_pixels();
+  clear_pixels();
   stop_sound();
 }
 
-//returns status of player correctness in their play for the full round
-//parameter is failed round# (0 indexed) if failed
+/**
+ * Conducts the players turn by allowing button presses from the user and presenting
+ * the presses on associated leds.
+ * Will stop rematurely if the user fails to enter the correct sequence
+ * @p_failed_round_num - pointer to location to place the 0-indexed round the player failed
+ * @return true if player was successful during round and false otherwise 
+ */
 bool player_turn(uint32_t* p_failed_round_num) {
   uint32_t round_num = get_round_number();
   for (int i = 0; i < round_num; ++i) {
@@ -237,7 +300,9 @@ bool player_turn(uint32_t* p_failed_round_num) {
   return true;
 }
 
-// presents failed round sound and display
+/**
+ * presents bad round failure by blinking the correct button to have pressed
+ */
 void present_bad_round(uint32_t failed_round_num) {
   show_display_failure();
   play_sound(BAD_BTN_SOUND);
@@ -250,8 +315,10 @@ void present_bad_round(uint32_t failed_round_num) {
   idle_time(250);
 }
 
-// busy wait for provided time
-// processes that need to be monitored/kicked are handled here
+/**
+ * busy wait for a duration 
+ * will maintain any required maintenance calls during the waiting period
+*/
 void idle_time(uint32_t delay_ms) {
   int end = millis() + delay_ms;
   while (millis() < end) {
@@ -260,6 +327,9 @@ void idle_time(uint32_t delay_ms) {
   }
 }
 
+/**
+ * displays the wait to start screen on the lcd
+ */
 void show_display_wait() {
   // Clear the buffer
   display.clearDisplay();
@@ -280,6 +350,11 @@ void show_display_wait() {
   display.display();
 }
 
+
+/**
+ * displays the round number on the lcd
+ * @round_num - the round number to display
+ */
 void show_display_round(uint8_t round_num) {
   // Clear the buffer
   display.clearDisplay();
@@ -296,6 +371,9 @@ void show_display_round(uint8_t round_num) {
   display.display();
 }
 
+/**
+ * displays the user entry failure screen on the lcd
+ */
 void show_display_failure() {
   // Clear the buffer
   display.clearDisplay();
@@ -353,7 +431,7 @@ void loop() {
         }
         idle_time(c_round_delay_ms / 4);
 
-        if (game_over()) {
+        if (is_game_over()) {
           show_display_wait();
           reset_game();
           m_state = STATE_IDLE;

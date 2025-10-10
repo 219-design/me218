@@ -26,9 +26,8 @@
 #include <Adafruit_AMG88xx.h>
 
 #define TFT_CS 6   //chip select pin for the TFT screen
-#define TFT_RST 7  // you can also connect this to the Arduino reset \
-                   // in which case, set this #define pin to 0!
-#define TFT_DC 3
+#define TFT_RST 7  // chip rst pin
+#define TFT_DC 3   //chip dc pin
 
 //low range of the sensor (this will be blue on the screen)
 #define MINTEMP 22
@@ -77,28 +76,17 @@ float pixels[AMG_COLS * AMG_ROWS];
 #define INTERPOLATED_COLS 24
 #define INTERPOLATED_ROWS 24
 
-float get_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y);
-void set_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y, float f);
-void get_adjacents_1d(float *src, float *dest, uint8_t rows, uint8_t cols, int8_t x, int8_t y);
-void get_adjacents_2d(float *src, float *dest, uint8_t rows, uint8_t cols, int8_t x, int8_t y);
-float cubicInterpolate(float p[], float x);
-float bicubicInterpolate(float p[], float x, float y);
-void interpolate_image(float *src, uint8_t src_rows, uint8_t src_cols,
-                       float *dest, uint8_t dest_rows, uint8_t dest_cols);
-
-
-float get_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y);
-void set_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y,
-               float f);
-void get_adjacents_1d(float *src, float *dest, uint8_t rows, uint8_t cols,
-                      int8_t x, int8_t y);
-void get_adjacents_2d(float *src, float *dest, uint8_t rows, uint8_t cols,
-                      int8_t x, int8_t y);
-float cubicInterpolate(float p[], float x);
-float bicubicInterpolate(float p[], float x, float y);
-void interpolate_image(float *src, uint8_t src_rows, uint8_t src_cols,
-                       float *dest, uint8_t dest_rows, uint8_t dest_cols);
-
+/**
+ * gets the value stored in a matrix
+ * if value of x/y is outside the bounds of the row/col limit, the closest 
+ * valid value is used
+ * @p - source of data
+ * @rows - maximum size of a row
+ * @cols - maximum size of a column
+ * @x - column number of data to retrieve
+ * @y - row number of data to retrieve
+ * @return - data at location (x,y) in matrix
+ */
 float get_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y) {
   if (x < 0)
     x = 0;
@@ -111,6 +99,16 @@ float get_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y) {
   return p[y * cols + x];
 }
 
+/**
+ * set the value of a matrix
+ * if value of x/y is outside the bounds of the row/col limit, value is not stored
+ * @p - destination space of data
+ * @rows - maximum size of a row
+ * @cols - maximum size of a column
+ * @x - column number of data to store
+ * @y - row number of data to store
+ * @f - value to store
+ */
 void set_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y,
                float f) {
   if ((x < 0) || (x >= cols))
@@ -120,8 +118,16 @@ void set_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y,
   p[y * cols + x] = f;
 }
 
-// src is a grid src_rows * src_cols
-// dest is a pre-allocated grid, dest_rows*dest_cols
+/**
+ * interpolates image from src to destination based on provided parameters
+ * using bicubic interpolation
+ * @src - source location of image
+ * @src_rows - number of rows of source image
+ * @src_cols - number of cols of source image
+ * @dest - destination location of image
+ * @dest_rows - number of rows of destination image
+ * @dest_cols - number of cols of destination image
+ */
 void interpolate_image(float *src, uint8_t src_rows, uint8_t src_cols,
                        float *dest, uint8_t dest_rows, uint8_t dest_cols) {
   float mu_x = (src_cols - 1.0) / (dest_cols - 1.0);
@@ -142,13 +148,24 @@ void interpolate_image(float *src, uint8_t src_rows, uint8_t src_cols,
   }
 }
 
-// p is a list of 4 points, 2 to the left, 2 to the right
+/**
+ * unilateral cubic interpolation of a set of data
+ * @p - source data to interpolate (4 points, 2 to the left, 2 to the right)
+ * @x - fractional component for interpolation
+ * @return response of interpolation 
+ */
 float cubicInterpolate(float p[], float x) {
   float r = p[1] + (0.5 * x * (p[2] - p[0] + x * (2.0 * p[0] - 5.0 * p[1] + 4.0 * p[2] - p[3] + x * (3.0 * (p[1] - p[2]) + p[3] - p[0]))));
   return r;
 }
 
-// p is a 16-point 4x4 array of the 2 rows & columns left/right/above/below
+/**
+ * bilateral cubic interoplation of a set of data
+ * @p - source data to interpolate (16-point 4x4 array of the 2 rows & columns left/right/above/below)
+ * @x - fractional component for interpolation in x direction
+ * @y - fractional component for interpolation in y direction
+ * @return response of interpolation 
+ */
 float bicubicInterpolate(float p[], float x, float y) {
   float arr[4] = { 0, 0, 0, 0 };
   arr[0] = cubicInterpolate(p + 0, x);
@@ -158,18 +175,17 @@ float bicubicInterpolate(float p[], float x, float y) {
   return cubicInterpolate(arr, y);
 }
 
-// src is rows*cols and dest is a 4-point array passed in already allocated!
-void get_adjacents_1d(float *src, float *dest, uint8_t rows, uint8_t cols,
-                      int8_t x, int8_t y) {
-  // pick two items to the left
-  dest[0] = get_point(src, rows, cols, x - 1, y);
-  dest[1] = get_point(src, rows, cols, x, y);
-  // pick two items to the right
-  dest[2] = get_point(src, rows, cols, x + 1, y);
-  dest[3] = get_point(src, rows, cols, x + 2, y);
-}
-
 // src is rows*cols and dest is a 16-point array passed in already allocated!
+
+/**
+ * gets a 2D set of 16 point data
+ * @src - source of data
+ * @dest - location to place data
+ * @rows - number of rows of source
+ * @cols - number of cols of source
+ * @x - center row location of source data
+ * @y - center col location of source data
+*/
 void get_adjacents_2d(float *src, float *dest, uint8_t rows, uint8_t cols,
                       int8_t x, int8_t y) {
   for (int8_t delta_y = -1; delta_y < 3; delta_y++) {    // -1, 0, 1, 2
@@ -180,12 +196,38 @@ void get_adjacents_2d(float *src, float *dest, uint8_t rows, uint8_t cols,
   }
 }
 
+/**
+ * draws pixels onto lcd
+ * @p - source location of data
+ * @rows - number of rows of source
+ * @cols - number of cols of source
+ * @ boxWidth - output pixel width
+ * @ boxHeight - output pixel height
+ */
+void drawpixels(float *p, uint8_t rows, uint8_t cols, uint8_t boxWidth, uint8_t boxHeight) {
+  int colorTemp;
+  for (int y = 0; y < rows; y++) {
+    for (int x = 0; x < cols; x++) {
+      float val = get_point(p, rows, cols, x, y);
+      if (val >= MAXTEMP) colorTemp = MAXTEMP;
+      else if (val <= MINTEMP) colorTemp = MINTEMP;
+      else colorTemp = val;
+
+      uint8_t colorIndex = map(colorTemp, MINTEMP, MAXTEMP, 0, 255);
+      colorIndex = (uint8_t)constrain((int16_t)colorIndex, (int16_t)0, (int16_t)255);
+      //draw the pixels!
+      //uint16_t color = val * 2;
+      tft.fillRect(boxWidth * x, boxHeight * y, boxWidth, boxHeight, camColors[colorIndex]);
+    }
+  }
+}
+
 void setup() {
   delay(500);
   Serial.begin(115200);
   Serial.println("\n\nAMG88xx Interpolated Thermal Camera!");
 
-  tft.initR(INITR_144GREENTAB);  // initialize a ST7735S chip, black tab
+  tft.initR(INITR_144GREENTAB);  // initialize a ST7735S chip, green tab
   tft.fillScreen(ST7735_BLACK);
 
   tft.setRotation(0);
@@ -220,23 +262,5 @@ void loop() {
 
   uint16_t boxsize = min(tft.width() / INTERPOLATED_COLS, tft.height() / INTERPOLATED_COLS);
 
-  drawpixels(dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS, boxsize, boxsize, false);
-}
-
-void drawpixels(float *p, uint8_t rows, uint8_t cols, uint8_t boxWidth, uint8_t boxHeight, boolean showVal) {
-  int colorTemp;
-  for (int y = 0; y < rows; y++) {
-    for (int x = 0; x < cols; x++) {
-      float val = get_point(p, rows, cols, x, y);
-      if (val >= MAXTEMP) colorTemp = MAXTEMP;
-      else if (val <= MINTEMP) colorTemp = MINTEMP;
-      else colorTemp = val;
-
-      uint8_t colorIndex = map(colorTemp, MINTEMP, MAXTEMP, 0, 255);
-      colorIndex = (uint8_t)constrain((int16_t)colorIndex, (int16_t)0, (int16_t)255);
-      //draw the pixels!
-      //uint16_t color = val * 2;
-      tft.fillRect(boxWidth * x, boxHeight * y, boxWidth, boxHeight, camColors[colorIndex]);
-    }
-  }
+  drawpixels(dest_2d, INTERPOLATED_ROWS, INTERPOLATED_COLS, boxsize, boxsize);
 }

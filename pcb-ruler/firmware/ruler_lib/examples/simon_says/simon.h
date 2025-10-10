@@ -8,6 +8,7 @@ uint32_t get_round_number();
 
 //gets btn index for given round
 //limit would be get_round_number() - 1
+//invalid round_num returns 0xFF
 uint32_t get_round_btn_idx(uint32_t round_num);
 
 //gets the full round pixel ON duration
@@ -24,7 +25,7 @@ void start_game();
 void end_game();
 
 //returns status of if game is over
-bool game_over();
+bool is_game_over();
 
 // resets game status to default
 void reset_game();

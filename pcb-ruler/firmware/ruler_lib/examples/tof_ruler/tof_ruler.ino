@@ -34,76 +34,11 @@ Adafruit_SSD1306 display(kDisplayWidth, kDisplayHeight, &Wire, kOledReset);
 
 Buttons buttons = Buttons(CENTER_BTN_PIN, INVALID_PIN, INVALID_PIN, INVALID_PIN ,INVALID_PIN);
 
-const char* imperial_frac[16] = {
-  " ",
-  " 1/16",
-  " 1/8 ",
-  " 3/16",
-  " 1/4 ",
-  " 5/16",
-  " 3/8 ",
-  " 7/16",
-  " 1/2 ",
-  " 9/16",
-  " 5/8 ",
-  "11/16",
-  " 3/4 ",
-  "13/16",
-  " 7/8 ",
-  "15/16",
-};
-
-const char* imperial_dec_to_frac(float f){
-  f = f - (int)f; 
-  if(f < 1/16.f){
-    return imperial_frac[0];
-  }
-  else if(f < 2/16.f){
-    return imperial_frac[1];
-  }
-  else if(f < 3/16.f){
-    return imperial_frac[2];
-  }
-  else if(f < 4/16.f){
-    return imperial_frac[3];
-  }
-  else if(f < 5/16.f){
-    return imperial_frac[4];
-  }
-  else if(f < 6/16.f){
-    return imperial_frac[5];
-  }
-  else if(f < 7/16.f){
-    return imperial_frac[6];
-  }
-  else if(f < 8/16.f){
-    return imperial_frac[7];
-  }
-  else if(f < 9/16.f){
-    return imperial_frac[8];
-  }
-  else if(f < 10/16.f){
-    return imperial_frac[9];
-  }
-  else if(f < 11/16.f){
-    return imperial_frac[10];
-  }
-  else if(f < 12/16.f){
-    return imperial_frac[11];
-  }
-  else if(f < 13/16.f){
-    return imperial_frac[12];
-  }
-  else if(f < 14/16.f){
-    return imperial_frac[13];
-  }
-  else if(f < 15/16.f){
-    return imperial_frac[14];
-  } else {
-    return imperial_frac[15];
-  }
-}
-
+/**
+ * displays the distance on the lcd
+ * distance units will displayed based on m_use_metric global variable
+ * @dist_mm - distance in mm
+ */
 void display_dist(uint32_t dist_mm){
     // Clear the buffer
   display.clearDisplay();
@@ -128,14 +63,17 @@ void display_dist(uint32_t dist_mm){
       display.printf("%4d mm\r\n", dist_mm);
     } else {
       display.printf("%4.3f in\r\n", dist_mm/25.4f);
-      // float f = dist_mm/25.4f;
-      // display.printf("%d %s\"\r\n", (int)f, imperial_dec_to_frac(f));
+      float f = dist_mm/25.4f;
+      display.printf("%f\"\r\n", f);
     }
   }
 
   display.display();
 }
 
+/**
+ * checks for change in input to adjust units
+*/
 void check_for_unit_change(){
   uint8_t btns = buttons.get_presses();  //keep this updated
   bool center_level = (btns & CENTER_BTN_MASK) ? true : false;
@@ -147,8 +85,6 @@ void check_for_unit_change(){
   //save last read
   m_last_read = center_level;
 }
-
-/* Setup ---------------------------------------------------------------------*/
 
 void setup()
 {
@@ -185,7 +121,6 @@ void loop()
   VL53L4CX_MultiRangingData_t *pMultiRangingData = &MultiRangingData;
   uint8_t NewDataReady = 0;
   int no_of_object_found = 0, j;
-  char report[64];
   int status;
 
   do {
