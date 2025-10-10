@@ -1,11 +1,9 @@
 # ME218 PCB Ruler Firmware Resources
 This folder contains firmware examples for basic component functionality.
 
-Looking for interdisciplinary project specific firmware? Check the demos folder. 
-
 ## Ruler Lib
 
-The Ruler Lib is small collection of classes for using some of the hardare features of the ruler board. 
+The Ruler Lib is small collection of classes for using some of the hardware features of the ruler board. 
 
 
 ### Installing Ruler Lib
@@ -28,7 +26,7 @@ All examples in this repository are included in the Arduino IDE when the Ruler L
 
 Select: File >> Examples >> ruler_lib >> simon_says
 
-Any dependant libraries are noted with the github repository in the example code.
+Any dependent libraries are noted with the github repository in the example code.
 
 
 ### Seed XIAO Boards 
