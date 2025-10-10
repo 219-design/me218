@@ -1,4 +1,13 @@
 /***************************************************************************
+  Example is edited from Adafruit examples for the AMG88xx GridEYE 8x8 IR
+  camera but to work with the GridEYE sensor and a 1.44" tft:
+    https://www.adafruit.com/product/2088
+
+  and the Adafruit AMG8833 STEMMA:
+          https://www.adafruit.com/product/3538
+ ***************************************************************************/
+
+/***************************************************************************
   This is a library for the AMG88xx GridEYE 8x8 IR camera
 
   This sketch makes an inetrpolated pixel thermal camera with the 
@@ -20,10 +29,12 @@
 
 #include <Adafruit_GFX.h>     // Core graphics library
 #include <Adafruit_ST7735.h>  // Hardware-specific library
+//https://github.com/adafruit/Adafruit-ST7735-Library
 #include <SPI.h>
 
 #include <Wire.h>
 #include <Adafruit_AMG88xx.h>
+//https://github.com/adafruit/Adafruit_AMG88xx
 
 #define TFT_CS 6   //chip select pin for the TFT screen
 #define TFT_RST 7  // chip rst pin
@@ -33,7 +44,7 @@
 #define MINTEMP 22
 
 //high range of the sensor (this will be red on the screen)
-#define MAXTEMP 31//34
+#define MAXTEMP 31  //34
 
 //the colors we will be using
 const uint16_t camColors[] = {0x480F,
@@ -174,8 +185,6 @@ float bicubicInterpolate(float p[], float x, float y) {
   arr[3] = cubicInterpolate(p + 12, x);
   return cubicInterpolate(arr, y);
 }
-
-// src is rows*cols and dest is a 16-point array passed in already allocated!
 
 /**
  * gets a 2D set of 16 point data
