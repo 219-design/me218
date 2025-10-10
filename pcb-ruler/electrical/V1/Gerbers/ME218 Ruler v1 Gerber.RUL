@@ -1,0 +1,11 @@
+DRC Rules Export File for PCB: C:\Users\kykypi\AppData\Local\TempReleases\Snapshot\1\PCB.PcbDoc
+RuleKind=SolderMaskExpansion|RuleName=SolderMaskExpansion_RequireTentedVias|Scope=Board|Minimum=4.00
+RuleKind=Clearance|RuleName=Clearance_digital|Scope=Board|Minimum=5.00
+RuleKind=Clearance|RuleName=Clearance_analog|Scope=Board|Minimum=5.00
+RuleKind=MinimumAnnularRing|RuleName=MinimumAnnularRing|Scope=Board|Minimum=5.00
+RuleKind=ShortCircuit|RuleName=ShortCircuit|Scope=Board|Allowed=0
+RuleKind=SolderMaskExpansion|RuleName=SolderMaskExpansion|Scope=Board|Minimum=5.00
+RuleKind=Width|RuleName=Width|Scope=Board|Minimum=5.00
+RuleKind=Clearance|RuleName=Clearance|Scope=Board|Minimum=5.00
+RuleKind=Clearance|RuleName=Clearance_Vias_to_Pads|Scope=Board|Minimum=10.00
+RuleKind=Clearance|RuleName=Clearance_polygon|Scope=Board|Minimum=10.00

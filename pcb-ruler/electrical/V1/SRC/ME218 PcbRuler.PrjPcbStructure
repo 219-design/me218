@@ -1,0 +1,3 @@
+Record=TopLevelDocument|FileName=Cover.SchDoc|SheetNumber=1
+Record=SheetSymbol|SourceDocument=Cover.SchDoc|Designator=U_Top|SchDesignator=U_Top|FileName=Top.SchDoc|SheetNumber=2|SymbolType=Normal|RawFileName=Top.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
+Record=SheetSymbol|SourceDocument=Top.SchDoc|Designator=U_Main|SchDesignator=U_Main|FileName=Main.SchDoc|SheetNumber=3|SymbolType=Normal|RawFileName=Main.SchDoc|DesignItemId= |SourceLibraryName= |ObjectKind=Sheet Symbol|RevisionGUID= |ItemGUID= |VaultGUID= 
