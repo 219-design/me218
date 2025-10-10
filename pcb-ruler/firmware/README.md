@@ -1,9 +1,14 @@
 # ME218 PCB Ruler Firmware Resources
-This folder contains example firmware for basic component functionality.
+This folder contains firmware examples for basic component functionality.
 
 Looking for interdisciplinary project specific firmware? Check the demos folder. 
 
-Installing Ruler Lib:
+## Ruler Lib
+
+The Ruler Lib is small collection of classes for using some of the hardare features of the ruler board. 
+
+
+### Installing Ruler Lib
 
 Open the Arduino IDE. 
 
@@ -13,14 +18,21 @@ In the file dialog, find the ruler_lib.zip file
 
 This will install the ruler_lib to use with sketches
 
-Running the Simon Says Example:
+### Editing the Ruler Lib
+
+If you'd like to make changes to the lib, you can modify the files in the src folder. Then compress the entire "ruler_lib" directory into a zip file and (re)install the new library from zip as described above.
+
+### Included Examples
+
+All examples in this repository are included in the Arduino IDE when the Ruler Lib is installed. To open an example from the IDE, such as the Simon Game example:
 
 Select: File >> Examples >> ruler_lib >> simon_says
 
-Install the dependant Adafruit_SSD1306 library and associated libraries.
+Any dependant libraries are noted with the github repository in the example code.
 
-Install the Seed XIAO Boards as instructed by:
 
+### Seed XIAO Boards 
+
+Install Seed XIAO Boards the as instructed by:
 https://wiki.seeedstudio.com/XIAO_BLE/#getting-started
 
-Select your board and compile
