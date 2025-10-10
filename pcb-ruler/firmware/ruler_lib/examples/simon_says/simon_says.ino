@@ -394,6 +394,8 @@ void setup() {
   pinMode(AUDIO_PIN, OUTPUT);
   stop_sound();
 
+  pixels.setBrightness(32);
+
   Serial.begin(115200);
 
   Serial.println("HELLO");
