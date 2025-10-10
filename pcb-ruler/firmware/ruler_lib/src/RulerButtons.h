@@ -27,10 +27,10 @@ public:
    * needs to be called regularly to debounce the button inputs
    * @return - each bit of the return value is associated with the BUTTON's MASK.
    * An asserted bit (1) indicates the button is pressed, a desserted bit (0) indicates the button is not pressed
-   *
+   */
   uint32_t get_presses();
 private:
-  const unsigned long c_debounceDelay = 50;  // the debounce time in ms
+  const unsigned long c_debounceDelay = 75;  // the debounce time in ms
   int m_btn_pin[NUM_BTNS] = { INVALID_PIN, INVALID_PIN, INVALID_PIN, INVALID_PIN, INVALID_PIN };
   uint8_t m_last_btn_rd[NUM_BTNS] = { BTN_DEASSERT_LEVEL, BTN_DEASSERT_LEVEL, BTN_DEASSERT_LEVEL, BTN_DEASSERT_LEVEL, BTN_DEASSERT_LEVEL };  //raw read
   uint8_t m_last_btn_debounce_time[NUM_BTNS] = { 0 };
